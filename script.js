@@ -1,4 +1,4 @@
-let tarefas = JSON.parse(localStorage.getItem('tarefa')) || [];
+let tarefas = JSON.parse(localStorage.getItem('tarefas')) || [];
 const formulario = document.getElementById('formularioTarefa');
 
 formulario.addEventListener('submit', (evento) => {
@@ -16,6 +16,7 @@ formulario.addEventListener('submit', (evento) => {
     }
 
     tarefas = [...tarefas, novaTarefa];
+
     salvarTarefas();
     renderizarTarefas(tarefas);
     formulario.reset();
@@ -42,5 +43,33 @@ const renderizarTarefas = (lista) => {
         `;
 
         container.appendChild(card);
+    });
+    atualizarFiltros();
+}
+
+function atualizarFiltros() {
+    const todasAsTags = [...new Set(tarefas.flatMap(({tags}) => tags))];
+    const container = document.getElementById('filtros');
+    container.innerHTML = `<button class="btn bt-outline-secondary me-2 mb-2">Todas</button>`;
+
+    todasAsTags.forEach(tag => {
+        const botao = document.createElement('button');
+        botao.className = 'btn btn-outline-secondary me-2 mb-2';
+        botao.textContent = tag;
+        botao.dataset.tag = tag;
+        container.appendChild(botao);
     })
 }
+
+document.getElementById('filtros').addEventListener('click', (evento) => {
+    const tagSelecionada = evento.target.dataset.tag;
+    if (!tagSelecionada) return;
+
+    const listaFiltrada = tagSelecionada === 'todas' 
+        ? tarefas 
+        : tarefas.filter(({ tags }) => tags.includes(tagSelecionada));
+    renderizarTarefas(listaFiltrada);
+});
+
+atualizarFiltros();
+renderizarTarefas(tarefas);
